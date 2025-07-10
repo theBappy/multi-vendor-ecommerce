@@ -1,16 +1,24 @@
+"use client";
+
 import Link from "next/link";
 import { Search, User, HeartIcon, ShoppingCart } from "lucide-react";
 import HeaderBottom from "./header-bottom";
+import useUser from "../../hooks/useUser";
 
 const Header = () => {
+  const { user, isLoading } = useUser();
+
   return (
     <div className="w-full bg-white">
       <div className="w-[80%] py-5 m-auto flex items-center justify-between">
-        <div className="">
-          <Link href={"/"}>
+        {/* Logo */}
+        <div>
+          <Link href="/">
             <span className="text-2xl font-[500]">E-shop</span>
           </Link>
         </div>
+
+        {/* Search Input */}
         <div className="w-[50%] relative">
           <input
             type="text"
@@ -21,27 +29,39 @@ const Header = () => {
             <Search color="#fff" />
           </div>
         </div>
+
+        {/* Right Icons */}
         <div className="flex items-center gap-8">
-          <div className="flex items-center gap-2">
+          {/* User Info */}
+          <div className="flex items-center gap-3">
             <Link
-              href={"/login"}
+              href={user ? "/profile" : "/login"}
               className="border-2 w-[50px] h-[50px] flex items-center justify-center rounded-full border-[#010f1c1a]"
             >
-              <User />
+              <User size={22} />
             </Link>
-            <Link href={"/login"}>
-              <span className="block font-medium">Hello,</span>
-              <span className="font-semibold">Sign In</span>
-            </Link>
+
+            <div className="leading-4">
+              <span className="block text-sm font-medium">Hello,</span>
+              <span className="text-sm font-semibold">
+                {isLoading
+                  ? "..."
+                  : user
+                  ? user.name?.split(" ")[0]
+                  : "Sign In"}
+              </span>
+            </div>
           </div>
+
+          {/* Wishlist + Cart */}
           <div className="flex items-center gap-5">
-            <Link href={"/wishlist"} className="relative">
+            <Link href="/wishlist" className="relative">
               <HeartIcon />
               <div className="w-5 h-5 border-2 border-white bg-red-500 rounded-full flex items-center justify-center absolute top-[-10px] right-[-10px]">
                 <span className="text-white font-medium text-sm">0</span>
               </div>
             </Link>
-            <Link href={"/cart"} className="relative">
+            <Link href="/cart" className="relative">
               <ShoppingCart />
               <div className="w-5 h-5 border-2 border-white bg-red-500 rounded-full flex items-center justify-center absolute top-[-10px] right-[-10px]">
                 <span className="text-white font-medium text-sm">0</span>
@@ -50,8 +70,10 @@ const Header = () => {
           </div>
         </div>
       </div>
+
+      {/* Divider + Bottom Header */}
       <div className="border-b border-b-[#99999938]" />
-        <HeaderBottom />
+      <HeaderBottom />
     </div>
   );
 };

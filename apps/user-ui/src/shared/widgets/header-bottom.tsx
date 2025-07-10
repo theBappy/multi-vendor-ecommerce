@@ -1,12 +1,20 @@
 "use client";
-import { AlignLeft, ChevronDown, HeartIcon, ShoppingCart, User } from "lucide-react";
+import {
+  AlignLeft,
+  ChevronDown,
+  HeartIcon,
+  ShoppingCart,
+  User,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import { NavItems } from "../../configs/constants";
 import Link from "next/link";
+import useUser from "../../hooks/useUser";
 
 const HeaderBottom = () => {
   const [show, setShow] = useState(false);
   const [isSticky, setIsSticky] = useState(false);
+  const { user, isLoading } = useUser();
 
   //track the scroll position
   useEffect(() => {
@@ -44,55 +52,65 @@ const HeaderBottom = () => {
             <AlignLeft color="white" />
             <span className="text-white font-medium">All Departments</span>
           </div>
-          <ChevronDown color='white' />
+          <ChevronDown color="white" />
         </div>
         {/* dropdown menu */}
         {show && (
-            <div className={`absolute left-0 ${isSticky ? "top-[70px]" : "top-[50px]"} w-[260px] h-[400px] bg-[#f5f5f5]`}>
-
-            </div>
+          <div
+            className={`absolute left-0 ${
+              isSticky ? "top-[70px]" : "top-[50px]"
+            } w-[260px] h-[400px] bg-[#f5f5f5]`}
+          ></div>
         )}
         {/* navigation link */}
         <div className="flex items-center">
-            {NavItems.map((item: NavItemsTypes, index: number) =>(
-                <Link 
-                href={item.href}
-                className="px-5 font-medium text-lg">
-                    {item.title}
-                </Link>
-            ))}
+          {NavItems.map((item: NavItemsTypes, index: number) => (
+            <Link
+              key={item.title}
+              href={item.href}
+              className="px-5 font-medium text-lg"
+            ></Link>
+          ))}
         </div>
         <div>
-            {isSticky && (
-                <div className="flex items-center gap-8">
-          <div className="flex items-center gap-2">
-            <Link
-              href={"/login"}
-              className="border-2 w-[50px] h-[50px] flex items-center justify-center rounded-full border-[#010f1c1a]"
-            >
-              <User />
-            </Link>
-            <Link href={"/login"}>
-              <span className="block font-medium">Hello,</span>
-              <span className="font-semibold">Sign In</span>
-            </Link>
-          </div>
-          <div className="flex items-center gap-5">
-            <Link href={"/wishlist"} className="relative">
-              <HeartIcon />
-              <div className="w-5 h-5 border-2 border-white bg-red-500 rounded-full flex items-center justify-center absolute top-[-10px] right-[-10px]">
-                <span className="text-white font-medium text-sm">0</span>
+          {isSticky && (
+            <div className="flex items-center gap-8">
+              <div className="flex items-center gap-3">
+                <Link
+                  href={user ? "/profile" : "/login"}
+                  className="border-2 w-[50px] h-[50px] flex items-center justify-center rounded-full border-[#010f1c1a]"
+                >
+                  <User size={22} />
+                </Link>
+
+                <div className="leading-4">
+                  <span className="block text-sm font-medium">Hello,</span>
+                  <span className="text-sm font-semibold">
+                    {isLoading
+                      ? "..."
+                      : user
+                      ? user.name?.split(" ")[0]
+                      : "Sign In"}
+                  </span>
+                </div>
               </div>
-            </Link>
-            <Link href={"/cart"} className="relative">
-              <ShoppingCart />
-              <div className="w-5 h-5 border-2 border-white bg-red-500 rounded-full flex items-center justify-center absolute top-[-10px] right-[-10px]">
-                <span className="text-white font-medium text-sm">0</span>
+
+              <div className="flex items-center gap-5">
+                <Link href={"/wishlist"} className="relative">
+                  <HeartIcon />
+                  <div className="w-5 h-5 border-2 border-white bg-red-500 rounded-full flex items-center justify-center absolute top-[-10px] right-[-10px]">
+                    <span className="text-white font-medium text-sm">0</span>
+                  </div>
+                </Link>
+                <Link href={"/cart"} className="relative">
+                  <ShoppingCart />
+                  <div className="w-5 h-5 border-2 border-white bg-red-500 rounded-full flex items-center justify-center absolute top-[-10px] right-[-10px]">
+                    <span className="text-white font-medium text-sm">0</span>
+                  </div>
+                </Link>
               </div>
-            </Link>
-          </div>
-        </div>
-            )}
+            </div>
+          )}
         </div>
       </div>
     </div>
