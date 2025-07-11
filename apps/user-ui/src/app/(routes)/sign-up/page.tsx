@@ -74,9 +74,9 @@ const Signup = () => {
       );
       return response.data;
     },
-    onSuccess: () => [
+    onSuccess: () => {
       router.push('/login')
-    ]
+  }
   });
 
   const onSubmit = (data: FormData) => {
