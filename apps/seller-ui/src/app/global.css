@@ -2,6 +2,16 @@
 @tailwind components;
 @tailwind utilities;
 
+/* in global.css or app.css */
+.sidebar-wrapper {
+  scrollbar-width: none;           /* Firefox */
+  -ms-overflow-style: none;        /* IE 10+ */
+}
+
+.sidebar-wrapper::-webkit-scrollbar {
+  display: none;                   /* Chrome, Safari, Edge */
+}
+
 :root {
   /* 🌑 Colors */
   --background: #ffffff; /* Sidebar background */
