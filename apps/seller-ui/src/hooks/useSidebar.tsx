@@ -1,9 +1,13 @@
 "use client"
 
+import {useAtom} from 'jotai'
+import { activeSidebarItem } from '../configs/constants'
+
 
 const useSidebar = () => {
-   
-  return 
+  const [activeSidebar, setActiveSidebar] = useAtom(activeSidebarItem)
+
+  return {activeSidebar, setActiveSidebar}
 }
 
 export default useSidebar
