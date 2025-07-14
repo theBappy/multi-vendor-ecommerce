@@ -46,5 +46,11 @@ app.use('/', proxy('http://localhost:6001'))
 const port = process.env.PORT || 8080;
 const server = app.listen(port, () => {
   console.log(`Listening at http://localhost:${port}/api`);
+  try{
+    
+    console.log('Site config initialized.');
+  }catch(error){
+    console.error('Error initializing site config:', error);
+  }
 });
 server.on('error', console.error);
