@@ -469,6 +469,12 @@ const CreateProduct = () => {
             Save Draft
           </button>
         )}
+        <button type="submit"
+        className="px-4 py-2 bg-blue-600 text-white rounded-md"
+        disabled={loading}
+        >
+          {loading ? "Creating..." : "Create"}
+        </button>
       </div>
     </form>
   );
