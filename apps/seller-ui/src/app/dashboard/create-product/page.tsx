@@ -338,6 +338,11 @@ const CreateProduct = () => {
                 />
               )}
               />
+              {errors.detailed_description && (
+                <p className="text-red-500 text-xs mt-1">
+                  {errors.detailed_description.message as string}
+                </p>
+              )}
               </div>
 
 
