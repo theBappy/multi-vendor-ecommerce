@@ -11,6 +11,7 @@ import { Controller, useForm } from "react-hook-form";
 import { useQuery } from "@tanstack/react-query";
 import axiosInstance from "../../utils/axiosInstance";
 import RichTextEditor from "packages/components/rich-text-editor";
+import SizeSelector from "packages/components/size-selector";
 
 const CreateProduct = () => {
   const {
@@ -19,10 +20,11 @@ const CreateProduct = () => {
     watch,
     setValue,
     handleSubmit,
+    getValues,
     formState: { errors },
   } = useForm();
   const [openImageModal, setOpenImageModal] = useState(false);
-  const [isChanged, setIschanged] = useState(false);
+  const [isChanged, setIschanged] = useState(true);
   const [images, setImages] = useState<(File | null)[]>([null]);
   const [loading, setLoading] = useState(false);
 
@@ -79,6 +81,9 @@ const CreateProduct = () => {
   const onSubmit = (data: any) => {
     console.log(data);
   };
+
+  const handleSaveDraft = () => {};
+
   return (
     <form
       className="w-full mx-auto p-8 shadow-md rounded-lg text-white"
@@ -317,38 +322,153 @@ const CreateProduct = () => {
               </div>
 
               <div className="mt-2">
-              <label className="block font-semibold text-gray-300 mb-1">
-                Detailed Description * (Min 100 words)
-              </label>
-              <Controller 
-              name="detailed_description"
-              control={control}
-              rules={{required: 'Details description is required!',
-                validate: (value) => {
-                  const wordCount = value?.split(/\s+/).filter((word:string) => word).length;
-                  return (
-                    wordCount >= 100 || 'Description must be at least 100 words!'
-                  )
-                }
-              }}
-              render={({field}) =>(
-                <RichTextEditor 
-                value={field.value}
-                onChange={field.onChange}
+                <label className="block font-semibold text-gray-300 mb-1">
+                  Detailed Description * (Min 100 words)
+                </label>
+                <Controller
+                  name="detailed_description"
+                  control={control}
+                  rules={{
+                    required: "Details description is required!",
+                    validate: (value) => {
+                      const wordCount = value
+                        ?.split(/\s+/)
+                        .filter((word: string) => word).length;
+                      return (
+                        wordCount >= 100 ||
+                        "Description must be at least 100 words!"
+                      );
+                    },
+                  }}
+                  render={({ field }) => (
+                    <RichTextEditor
+                      value={field.value}
+                      onChange={field.onChange}
+                    />
+                  )}
                 />
-              )}
-              />
-              {errors.detailed_description && (
-                <p className="text-red-500 text-xs mt-1">
-                  {errors.detailed_description.message as string}
-                </p>
-              )}
+                {errors.detailed_description && (
+                  <p className="text-red-500 text-xs mt-1">
+                    {errors.detailed_description.message as string}
+                  </p>
+                )}
               </div>
 
+              <div className="mt-2">
+                <Input
+                  label="Video URL"
+                  placeholder="https://www.youtube.com/embed/123xyz"
+                  {...register("video_url", {
+                    pattern: {
+                      value:
+                        /^https:\/\/www\.youtube\.com\/embed\/[a-zA-Z0-9_-]+$/,
+                      message:
+                        "Invalid YouTube embed URL! Use format: https://www.youtube.com/embed/VIDEO_ID",
+                    },
+                  })}
+                />
+                {errors.video_url && (
+                  <p className="text-red-500 text-xs mt-1">
+                    {errors.video_url.message as string}
+                  </p>
+                )}
+              </div>
 
+              <div className="mt-2">
+                <Input
+                  label="Regular Price *"
+                  placeholder="45$"
+                  {...register("regular_price", {
+                    valueAsNumber: true,
+                    min: {
+                      value: 1,
+                      message: "Regular price must be at least 1",
+                    },
+                    validate: (value) =>
+                      !isNaN(value) || "Only numbers are allowed",
+                  })}
+                />
+                {errors.regular_price && (
+                  <p className="text-red-500 text-xs mt-1">
+                    {errors.regular_price.message as string}
+                  </p>
+                )}
+              </div>
+
+              <div className="mt-2">
+                <Input
+                  label="Sale Price *"
+                  placeholder="35$"
+                  {...register("sale_price", {
+                    valueAsNumber: true,
+                    min: { value: 1, message: "Sale price must be at least 1" },
+                    validate: (value) => {
+                      if (isNaN(value)) {
+                        return "Only numbers are allowed";
+                      }
+                      const regularPrice = getValues("regular_price");
+                      if (regularPrice && value >= regularPrice) {
+                        return "Sale price must be less than Regular Price";
+                      }
+                      return true;
+                    },
+                  })}
+                />
+                {errors.sale_price && (
+                  <p className="text-red-500 text-xs mt-1">
+                    {errors.sale_price.message as string}
+                  </p>
+                )}
+              </div>
+
+              <div className="mt-2">
+                <Input
+                  label="Stock *"
+                  placeholder="e.g. 10"
+                  type="number"
+                  {...register("stock", {
+                    required: "Stock is required!",
+                    valueAsNumber: true,
+                    min: { value: 1, message: "Stock must be 1 or more" },
+                    max: { value: 1000, message: "Stock cannot exceed 1,000" },
+                    validate: (value) => {
+                      if (!isNaN(value)) return "Only numbers are allowed";
+                      if (!Number.isInteger(value))
+                        return "Stock must be a whole number";
+                      return true;
+                    },
+                  })}
+                />
+                {errors.stock && (
+                  <p className="text-red-500 text-xs mt-1">
+                    {errors.stock.message as string}
+                  </p>
+                )}
+              </div>
+
+              <div className="mt-2">
+                <SizeSelector control={control} errors={errors} />
+              </div>
+
+              <div className="mt-3">
+                <label className="block font-semibold text-gray-300 mb-1">
+                  Select Discount Codes (optional)
+                </label>
+              </div>
             </div>
           </div>
         </div>
+      </div>
+      <div className="mt-6 flex justify-end gap-3">
+        {isChanged && (
+          <button
+            type="button"
+            className="px-4 py-2 bg-gray-700 text-white rounded-md"
+            onClick={handleSaveDraft}
+          >
+            Save Draft
+          </button>
+        )}
       </div>
     </form>
   );
