@@ -378,10 +378,12 @@ export const createStripeConnectLink = async (
 
     if (!sellerId) return next(new ValidationError("Seller ID is required"));
 
+
     const seller = await prisma.sellers.findUnique({ where: { id: sellerId } });
 
     if (!seller)
       return next(new ValidationError("Seller is not available with this ID"));
+
 
     const account = await stripe.accounts.create({
       type: "express",
@@ -392,6 +394,7 @@ export const createStripeConnectLink = async (
         transfers: { requested: true },
       },
     });
+
 
     await prisma.sellers.update({
       where: { id: sellerId },
@@ -404,6 +407,21 @@ export const createStripeConnectLink = async (
       return_url: `http://localhost:3000/success`,
       type: "account_onboarding",
     });
+
+
+
+    await prisma.sellers.update({
+      where: { id: sellerId },
+      data: { stripeId: account.id },
+    });
+
+    const accountLink = await stripe.accountLinks.create({
+      account: account.id,
+      refresh_url: `http://localhost:3000/succes`,
+      return_url: `http://localhost:3000/success`,
+      type: "account_onboarding",
+    });
+
 
     res.json({ url: accountLink.url });
   } catch (error) {
@@ -430,8 +448,10 @@ export const loginSeller = async (
     const isMatch = await bcrypt.compare(password, seller.password);
     if (!isMatch) return next(new ValidationError("Invalid email or password"));
 
+
     res.clearCookie('access_token')
     res.clearCookie('refresh_token')
+
 
     const accessToken = jwt.sign(
       { id: seller.id, role: "seller" },
