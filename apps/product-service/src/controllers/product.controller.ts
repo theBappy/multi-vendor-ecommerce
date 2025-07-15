@@ -31,27 +31,36 @@ export const createDiscountCodes = async (
 ) => {
   try {
     const { public_name, discountType, discountValue, discountCode } = req.body;
+    const sellerId = req.seller?.id;
+
+    if (!sellerId) {
+      return next(new ValidationError("Seller not authenticated"));
+    }
+
+    const normalizedCode = discountCode.trim().toUpperCase();
+    const parsedValue = parseFloat(discountValue);
+
+    if (isNaN(parsedValue) || parsedValue <= 0) {
+      return next(new ValidationError("Discount value must be a valid number"));
+    }
 
     const isDiscountCodeExist = await prisma.discount_codes.findUnique({
-      where: {
-        discountCode,
-      },
+      where: { discountCode: normalizedCode },
     });
 
     if (isDiscountCodeExist) {
       return next(
-        new ValidationError(
-          "Discount code already available please use a different code!"
-        )
+        new ValidationError("Discount code already exists. Please use a different code.")
       );
     }
+
     const discount_code = await prisma.discount_codes.create({
       data: {
         public_name,
         discountType,
-        discountValue: parseFloat(discountValue),
-        discountCode,
-        sellerId: req.seller.id,
+        discountValue: parsedValue,
+        discountCode: normalizedCode,
+        sellerId,
       },
     });
 
@@ -60,6 +69,7 @@ export const createDiscountCodes = async (
       discount_code,
     });
   } catch (error) {
+    console.error("Create Discount Error:", error); 
     next(error);
   }
 };
