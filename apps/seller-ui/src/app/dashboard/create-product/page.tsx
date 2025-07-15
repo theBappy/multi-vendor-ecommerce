@@ -1,7 +1,7 @@
 "use client";
 
 import ImagePlaceholder from "apps/seller-ui/src/shared/components/image-placeholder";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, X } from "lucide-react";
 import ColorSelector from "packages/components/color-selector";
 import CustomProperties from "packages/components/custom-properties";
 import CustomSpecifications from "packages/components/custom-specification";
@@ -11,7 +11,13 @@ import { Controller, useForm } from "react-hook-form";
 import { useQuery } from "@tanstack/react-query";
 import axiosInstance from "../../utils/axiosInstance";
 import RichTextEditor from "packages/components/rich-text-editor";
+import Image from 'next/image'
 import SizeSelector from "packages/components/size-selector";
+
+interface UploadedImage{
+  fileId: string;
+  file_url: string;
+}
 
 const CreateProduct = () => {
   const {
@@ -25,8 +31,10 @@ const CreateProduct = () => {
   } = useForm();
   const [openImageModal, setOpenImageModal] = useState(false);
   const [isChanged, setIschanged] = useState(true);
-  const [images, setImages] = useState<(File | null)[]>([null]);
+  const [images, setImages] = useState<(UploadedImage | null)[]>([null]);
   const [loading, setLoading] = useState(false);
+  const [selectedImage, setSelectedImage] = useState('')
+  const [pictureUploadingLoader, setPictureUploadingLoader] = useState(false)
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ["categories"],
@@ -42,6 +50,14 @@ const CreateProduct = () => {
     retry: 2,
   });
 
+  const { data: discountCodes = [], isLoading: discountLoading } = useQuery({
+    queryKey: ["shop-discounts"],
+    queryFn: async () => {
+      const res = await axiosInstance.get("/product/api/get-discount-codes");
+      return res?.data?.discount_codes || [];
+    },
+  });
+
   const categories = data?.categories || [];
   const subCategoriesData = data?.subCategories || {};
 
@@ -52,30 +68,63 @@ const CreateProduct = () => {
     return selectedCategory ? subCategoriesData[selectedCategory] || [] : [];
   }, [selectedCategory, subCategoriesData]);
 
-  const handleImageChange = (file: File | null, index: number) => {
-    const updatedImages = [...images];
-    updatedImages[index] = file;
-    if (index === images.length - 1 && images.length < 8) {
-      updatedImages.push(null);
+  const convertFileToBase64 = (file: File) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader()
+      reader.readAsDataURL(file)
+      reader.onload = () => resolve(reader.result)
+      reader.onerror = (error) => reject(error)
+    })
+  }
+
+  const handleImageChange = async(file: File | null, index: number) => {
+    if(!file) return;
+    setPictureUploadingLoader(true)
+    try{
+      const fileName = await convertFileToBase64(file)
+      const response = await axiosInstance.post("/product/api/upload-product-image", {fileName})
+      const uploadedImage = {
+        fileId: response.data.fileId,
+        file_url: response.data.file_url,
+      } 
+      const updatedImages =[...images]
+      updatedImages[index] = uploadedImage; 
+
+      if(index === images.length - 1 && updatedImages.length < 8){
+        updatedImages.push(null)
+      }
+      setImages(updatedImages)
+      setValue("images", updatedImages)
+    }catch(error){
+      console.log(error)
+    }finally{
+      setPictureUploadingLoader(false)
     }
-    setImages(updatedImages);
-    setValue("images", updatedImages);
   };
 
-  const handleRemoveImage = (index: number) => {
-    setImages((prev) => {
-      let updatedImages = [...prev];
-      if (index === -1) {
-        updatedImages[0] = null;
-      } else {
-        updatedImages.splice(index, 1);
+  const handleRemoveImage = async(index: number) => {
+    try{
+      const updatedImages = [...images]
+      const imageToDelete = updatedImages[index]
+      if(imageToDelete && typeof imageToDelete === 'object'){
+       await axiosInstance.delete("/product/api/delete-product-image", {
+        data: {
+          fileId: imageToDelete.fileId!,
+        }
+       })
       }
-      if (!updatedImages.includes(null) && updatedImages.length < 8) {
-        updatedImages.push(null);
+      updatedImages.splice(index, 1)
+      // add null placeholder
+      if(!updatedImages.includes(null) && updatedImages.length < 8){
+        updatedImages.push(null)
       }
-      return updatedImages;
-    });
-    setValue("images", images);
+
+      setImages(updatedImages)
+      setValue('images', updatedImages)
+
+    }catch(error){
+      console.log(error)
+    }
   };
 
   const onSubmit = (data: any) => {
@@ -110,6 +159,9 @@ const CreateProduct = () => {
               index={0}
               onImageChange={handleImageChange}
               onRemove={handleRemoveImage}
+              setSelectedImage={setSelectedImage}
+              images={images}
+              pictureUploadingLoader={pictureUploadingLoader}
             />
           )}
           <div className="grid grid-cols-2 gap-3 mt-4">
@@ -122,6 +174,9 @@ const CreateProduct = () => {
                 index={index + 1}
                 onImageChange={handleImageChange}
                 onRemove={handleRemoveImage}
+                setSelectedImage = {setSelectedImage}
+                images={images}
+                pictureUploadingLoader={pictureUploadingLoader}
               />
             ))}
           </div>
@@ -454,11 +509,77 @@ const CreateProduct = () => {
                 <label className="block font-semibold text-gray-300 mb-1">
                   Select Discount Codes (optional)
                 </label>
+                {discountLoading ? (
+                  <p className="text-gray-400">Loading Discount Codes</p>
+                ) : (
+                  <div className="flex flex-wrap gap-2">
+                    {discountCodes?.map((code: any) => (
+                      <button
+                        key={code.id}
+                        type="button"
+                        className={`px-3 py-1 rounded-md text-sm font-semibold border ${
+                          watch("discountCodes")?.includes(code.id)
+                            ? "bg-blue-600 text-white border-blue-600"
+                            : "bg-gray-800 text-gray-300 border-gray-600 hover:border-gray-700"
+                        }`}
+                        onClick={() => {
+                          const currentSelection = watch("discountCodes") || [];
+                          const updatedSelection = currentSelection?.includes(
+                            code.id
+                          )
+                            ? currentSelection.filter(
+                                (id: string) => id !== code.id
+                              )
+                            : [...currentSelection, code.id];
+                          setValue("discountCodes", updatedSelection);
+                        }}
+                      >
+                        {code?.public_name} ({code.discountValue}
+                        {code.discountType === "percentage" ? "%" : "$"})
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           </div>
         </div>
       </div>
+      
+      {openImageModal && (
+        <div className="fixed top-0 left-0 w-full h-full flex items-center justify-center bg-black bg-opacity-60 z-50">
+          <div className="bg-gray-800 p-6 rounded-lg w-[450px] text-white">
+          <div className="flex justify-between items-center pb-3 mb-4">
+            <h2 className="text-lg font-semibold">
+              Enhance Product Image
+            </h2>
+            <X size={20} className="cursor-pointer"
+            onClick={() => setOpenImageModal(!openImageModal)}
+             />
+          </div>
+          <div className="w-full h-[250px] rounded-md overflow-hidden border border-gray-600">
+          <Image 
+          src={selectedImage} 
+          alt="product-image"
+          layout="fill"
+          />
+          </div>
+          {selectedImage && (
+            <div className="mt-4 space-y-2">
+              <h3 className="text-white text-sm font-semibold">
+                AI Enhancements
+              </h3>
+              <div className="grid grid-cols-2 gap-3 mx-h-[250px] overflow-y-auto">
+
+              </div>
+            </div>
+          )}
+          </div>
+        </div>
+      )}
+
+
+
       <div className="mt-6 flex justify-end gap-3">
         {isChanged && (
           <button
@@ -469,9 +590,10 @@ const CreateProduct = () => {
             Save Draft
           </button>
         )}
-        <button type="submit"
-        className="px-4 py-2 bg-blue-600 text-white rounded-md"
-        disabled={loading}
+        <button
+          type="submit"
+          className="px-4 py-2 bg-blue-600 text-white rounded-md"
+          disabled={loading}
         >
           {loading ? "Creating..." : "Create"}
         </button>

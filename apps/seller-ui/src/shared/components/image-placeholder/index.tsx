@@ -10,6 +10,9 @@ interface ImagePlaceholderProps {
   defaultImage?: string | null;
   setOpenImageModal: (openImageModal: boolean) => void;
   index?: any;
+  setSelectedImage: (e: string) => void;
+  images: any;
+  pictureUploadingLoader: boolean;
 }
 
 const ImagePlaceholder = ({
@@ -19,7 +22,10 @@ const ImagePlaceholder = ({
   onRemove,
   defaultImage = null,
   index = null,
+  setSelectedImage,
+  images,
   setOpenImageModal,
+  pictureUploadingLoader,
 }: ImagePlaceholderProps) => {
   const [imagePreview, setImagePreview] = useState<string | null>(defaultImage);
 
@@ -50,12 +56,17 @@ const ImagePlaceholder = ({
             type="button"
             className="absolute top-3 right-3 p-2 !rounded bg-red-600 shadow-lg"
             onClick={() => onRemove?.(index!)}
+            disabled={pictureUploadingLoader}
           >
             <X size={16} />
           </button>
           <button
+          disabled={pictureUploadingLoader}
             className="top-3 right-[70px] absolute p-2 !rounded bg-blue-500 shadow-lg cursor-pointer"
-            onClick={() => setOpenImageModal(true)}
+            onClick={() => {
+              setOpenImageModal(true)
+              setSelectedImage(images[index].file_url)
+            }}
           >
             <WandSparkles size={16} />
           </button>
