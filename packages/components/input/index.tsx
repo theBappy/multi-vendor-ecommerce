@@ -4,7 +4,6 @@ interface BaseProps {
   label?: string;
   type?: "text" | "number" | "password" | "email" | "textarea";
   className?: string;
-  name?: string;
 }
 
 type InputProps = BaseProps & React.InputHTMLAttributes<HTMLInputElement>;
@@ -12,13 +11,16 @@ type TextareaProps = BaseProps & React.TextareaHTMLAttributes<HTMLTextAreaElemen
 type Props = InputProps | TextareaProps;
 
 const Input = forwardRef<HTMLInputElement | HTMLTextAreaElement, Props>(
-  ({ label, type = "text", className = "", name, ...rest }, ref) => {
-    const inputId = name || label?.toLowerCase().replace(/\s+/g, "-") || "input";
+  ({ label, type = "text", className = "", ...rest }, ref) => {
+    const inputId = rest.name || label?.toLowerCase().replace(/\s+/g, "-") || "input";
 
     return (
       <div className="w-full">
         {label && (
-          <label htmlFor={inputId} className="block font-semibold text-gray-300 mb-1">
+          <label
+            htmlFor={inputId}
+            className="block font-semibold text-gray-300 mb-1"
+          >
             {label}
           </label>
         )}
@@ -44,6 +46,6 @@ const Input = forwardRef<HTMLInputElement | HTMLTextAreaElement, Props>(
   }
 );
 
-Input.displayName = "Input"; 
+Input.displayName = "Input";
 
 export default Input;
