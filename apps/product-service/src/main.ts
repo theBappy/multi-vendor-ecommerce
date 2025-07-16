@@ -1,12 +1,10 @@
 import express from 'express';
+import "./jobs/product-cron-job"
 import cors from 'cors'
 import cookieParser from 'cookie-parser';
 import { errorMiddleware } from '@packages/error-handler/error-middleware';
 import router from './routes/product.router';
 
-
-// import swaggerUi from 'swagger-ui-express'
-// const swaggerDocument = require("./swagger-output.json")
 
 const app = express();
 
