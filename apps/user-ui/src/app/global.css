@@ -2,7 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
-
+:root {
+  --font-oregano: 'Oregano', cursive;
+}
 
 
     html {

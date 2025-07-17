@@ -120,6 +120,7 @@ model products {
   regular_price         Float
   ratings               Float         @default(5)
   warranty              String?
+  totalSales Int @default(0)
   custom_specifications Json?
   custom_properties     Json?
   isDeleted             Boolean?      @default(false)
