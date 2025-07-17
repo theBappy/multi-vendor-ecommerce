@@ -1,4 +1,4 @@
-'use client'
+
 import { MoveRight } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -30,7 +30,7 @@ const Hero = () => {
           </button>
         </div>
         <div className="md:w-1/2 flex justify-center">
-          <Image alt="" src={"/watch8.png"} width={450} height={450} />
+          <Image alt="" src={"/watch-chatgpt.png"} width={450} height={450} />
         </div>
       </div>
     </div>

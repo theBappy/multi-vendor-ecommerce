@@ -1,3 +1,6 @@
+
+
+import Image from "next/image";
 import Link from "next/link";
 
 const ProductCard = ({
@@ -20,7 +23,7 @@ const ProductCard = ({
         </div>
       )}
       <Link href={`/product/${product?.slug}`}>
-        <img src={product?.images[0]?.url || "https://unsplash.com/photos/black-smart-watch-with-white-background-O43D6CYzxqM"} alt={product?.title} 
+        <Image src={product?.images[0]?.url || "https://unsplash.com/photos/black-smart-watch-with-white-background-O43D6CYzxqM"} alt={product?.title} 
         width={300}
         height={300}
         className="w-full h-[200px] object-cover mx-auto rounded-t-md"

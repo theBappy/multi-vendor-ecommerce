@@ -1,3 +1,4 @@
+'use client'
 import { SectionTitle } from "../shared/section-title";
 import Hero from "../shared/widgets/hero";
 import { useQuery } from "@tanstack/react-query";
