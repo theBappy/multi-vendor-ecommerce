@@ -10,8 +10,9 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
-        Roboto: ["var(--font-roboto)"],
-        Poppins: ["var(--font-poppins)"],
+        Roboto: ['var(--font-roboto)', 'sans-serif'],
+        Poppins: ['var(--font-poppins)', 'sans-serif'],
+        Oregano: ['var(--font-oregano)', 'cursive'],
       }
     },
   },
