@@ -12,6 +12,11 @@ import {
   ShoppingCart,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import useLocationTracking from "apps/user-ui/src/hooks/useLocationTracking";
+import useDeviceTracking from "apps/user-ui/src/hooks/useDeviceTracking";
+import useUser from "apps/user-ui/src/hooks/useUser";
+import { useStore } from "apps/user-ui/src/store";
+
 
 const ProductDetailsCard = ({
   data,
@@ -25,6 +30,18 @@ const ProductDetailsCard = ({
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
   const [quantity, setQuantity] = useState(1);
   const router = useRouter();
+
+    const { user } = useUser()
+    const location = useLocationTracking()
+    const deviceInfo = useDeviceTracking()
+  
+    const addToCart = useStore((state: any) => state.addToCart);
+    const addToWishlist = useStore((state: any) => state.addToWishlist);
+    const removeFromWishlist = useStore((state: any) => state.removeFromWishlist);
+    const wishlist = useStore((state: any) => state.wishlist);
+    const isWishlisted = wishlist.some((item: any) => item.id === data.id);
+    const cart = useStore((state: any) => state.cart);
+    const isInCart = cart.some((item: any) => item.id === data.id);
 
   const estimatedDelivery = new Date()
   estimatedDelivery.setDate(estimatedDelivery.getDate() + 5)
@@ -206,13 +223,43 @@ const ProductDetailsCard = ({
               </div>
 
               {/* Add to Cart */}
-              <button className="flex items-center gap-2 px-4 py-2 bg-[#ff5722] hover:bg-[#e64a19] text-white font-medium rounded-lg transition">
+              <button 
+              disabled={isInCart}
+              onClick={() => 
+                addToCart(
+                  {
+                    ...data,
+                    quantity,
+                    selectedOptions: {
+                      color: selectedColor,
+                      size: selectedSize,
+                    },
+                  },
+                  user, 
+                  location,
+                  deviceInfo
+                )
+              }
+              className={`flex items-center gap-2 px-4 py-2 bg-[#ff5722] ${isInCart ? "cursor-not-allowed" : "cursor-pointer"}`}>
                 <ShoppingCart size={18} /> Add to Cart
               </button>
 
               {/* Wishlist */}
               <button className="opacity-[0.7] cursor-pointer">
-                <Heart size={30} fill="red" color="transparent" />
+                <Heart
+                fill={isWishlisted ? "red" : "transparent"}
+                color={isWishlisted ? "transparent" : "black"}
+                onClick={() =>
+                              isWishlisted
+                                ? removeFromWishlist(data.id, user, location, deviceInfo)
+                                : addToWishlist(
+                                    { ...data, quantity: 1 },
+                                    user,
+                                    location,
+                                    deviceInfo
+                                  )
+                            }
+                size={30} />
               </button>
             </div>
 
