@@ -8,6 +8,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { Loader2 } from "lucide-react";
 
 const CartPage = () => {
   const router = useRouter();
@@ -17,7 +18,10 @@ const CartPage = () => {
 
   const [loading, setLoading] = useState(false);
   const [discountedProductId, setDiscountedProductId] = useState("");
+  const [couponCode, setCouponCode] = useState("");
+  const [selectedAddressId, setSelectedAddressId] = useState("");
   const [discountPercent, setDiscountPercent] = useState(0);
+  const [discountAmount, setDiscountAmount] = useState(0);
 
   const cart = useStore((state: any) => state.cart);
   const removeFromCart = useStore((state: any) => state.removeFromCart);
@@ -153,11 +157,94 @@ const CartPage = () => {
                           </button>
                         </div>
                       </td>
-                      {/* from here start tomorrow */}
+                      <td className="text-center">
+                        <button 
+                        onClick={()=>removeItem(item?.id)}
+                        className="text-[#818487] cursor-pointer hover:text-[#ff1826] transition duration-200">
+                          x Remove
+                        </button>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
+              <div className="p-6 shadow-md w-full lg:w-[30%] bg-[#f9f9f9] rounded-lg">
+                  {discountAmount > 0 && (
+                    <div className="flex justify-between items-center text-[#010f1c] font-medium pb-1 text-base">
+                      <span className="font-Poppins">
+                      Discount ({discountPercent}%)
+                      </span>
+                      <span className="text-green-600">
+                      - ${discountAmount.toFixed(2)}
+                      </span>
+                    </div>
+                  )}
+                  <div className="text-[#010f1c] font-[550] pb-3 text-[20px] items-center flex justify-between">
+                  <span className="font-Poppins">Subtotal</span>
+                  <span>${(subtotal - discountAmount).toFixed(2)}</span>
+                  </div>
+                  <hr className="my-4 text-slate-200" />
+                  <div className="mb-4">
+                    <h4 className="mb-[7px] font-[500] text-[15px]">
+                  Have a coupon?
+                    </h4>
+                    <div className="flex">
+                      <input 
+                      type="text" 
+                      onChange={(e: any) => setCouponCode(e.target.value)}
+                      value={couponCode} 
+                      placeholder="Enter coupon code"
+                      className="w-full p-2 border border-gray-200 rounded-l-md focus:outline-none focus:border-blue-500"
+                      />
+                      <button
+                      // onClick={() => couponCodeApply}
+                      className='transition-all bg-blue-500 cursor-pointer text-white px-4 rounded-r-md hover:bg-blue-600'
+                      >
+                        Apply
+                      </button>
+                      {/* {error && (
+                        <p className="text-sm pt-2 text-red-500">
+                          {error}
+                        </p>
+                      )} */}
+                    </div>
+                    <hr className="my-4 text-slate-200" />
+                    <div className="mb-4">
+                      <h4 className="mb-[7px] font-medium text-[15px]">
+                        Select Shipping Address
+                      </h4>
+                      <select
+                      value={selectedAddressId}
+                      onChange={(e) => setSelectedAddressId(e.target.value)}
+                      className="focus:outline-none focus:border-blue-500 rounded-md border border-gray-200 w-full p-2" 
+                      >
+                        <option value="123">
+                        Home - New York - USA
+                        </option>
+                      </select>
+                    </div>
+                    <hr className="my-4 text-slate-200" />
+                    <div className="mb-4">
+                        <h4>Select Payment Method</h4>
+                        <select className="focus:outline-none focus:border-blue-500 rounded-md border border-gray-200 w-full p-2">
+                          <option value="credit_card">Online Payment</option>
+                          <option value="cash_on_delivery">Cash on Delivery</option>
+                        </select>
+                    </div>
+                    <hr className="my-4 text-slate-200" />
+                    <div className="flex justify-between items-center text-[#010f1c] text-[20px] pb-3 font-[550]">
+                        <span className="font-Poppins">Total</span>
+                       <span>${(subtotal - discountAmount).toFixed(2)}</span>
+                    </div>
+                    <button
+                    disabled={loading}
+                    className="w-full flex items-center justify-center gap-2 cursor-pointer mt-4 py-3 bg-[#010f1c] text-wite hover:bg-[#0989ff] transition-all rounded-lg"
+                    >
+                      {loading && <Loader2 className="animate-spin w-5 h-5" />}
+                      {loading ? "Redirecting..." : "Proceed to Checkout"}
+                    </button>
+                  </div>
+              </div>  
             </div>
           )}
         </div>
