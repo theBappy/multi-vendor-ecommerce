@@ -238,7 +238,7 @@ const CartPage = () => {
                     </div>
                     <button
                     disabled={loading}
-                    className="w-full flex items-center justify-center gap-2 cursor-pointer mt-4 py-3 bg-[#010f1c] text-wite hover:bg-[#0989ff] transition-all rounded-lg"
+                    className="w-full flex items-center justify-center gap-2 cursor-pointer mt-4 py-3 bg-[#010f1c] text-white hover:bg-[#0989ff] transition-all rounded-lg"
                     >
                       {loading && <Loader2 className="animate-spin w-5 h-5" />}
                       {loading ? "Redirecting..." : "Proceed to Checkout"}
