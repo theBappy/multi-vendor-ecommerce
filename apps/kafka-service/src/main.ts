@@ -1,4 +1,5 @@
 
+
 import { kafka } from '@packages/utils/kafka'
 import { updateUserAnalytics } from './services/analytics-service'
 
@@ -44,7 +45,7 @@ export const consumeKafkaMessages = async() => {
   await consumer.subscribe({topic: "users-events", fromBeginning: false})
 
   await consumer.run({
-    eachMessage: async({message}) => {
+    eachMessage: async({message}: {message: any}) => {
       if(!message.value) return
       const event = JSON.parse(message.value.toString())
       eventQueue.push(event)
