@@ -3,13 +3,14 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 export const kafka = new Kafka({
-  brokers: [
-    'd1u8s3k4tis6701qtieg.any.us-east-1.mpx.prd.cloud.redpanda.com:9092',
-  ],
+  clientId: "d1usoqc4tis6701qu190",
+  brokers: ["d1usoqc4tis6701qu190.any.us-east-1.mpx.prd.cloud.redpanda.com:9092"],
   ssl: true,
   sasl: {
-    mechanism: 'SCRAM-SHA-256', 
-    username: 'thebappy',
-    password: 'eXtwxdh7VSR7zG24p2tcxxMazuq4jf',
+    mechanism: "scram-sha-512",
+    username: "my-kafka-user", 
+    password: "gyrQ9FSl2n7l6w44pQ5m2WhzBlWpw1",
   },
 });
+
+

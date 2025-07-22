@@ -6,6 +6,7 @@ export const updateUserAnalytics = async (event: any) => {
       where: {
         userId: event.userId,
       },
+      select:{ actions:true },
     });
 
     let updatedActions: any = existingData?.actions || [];
