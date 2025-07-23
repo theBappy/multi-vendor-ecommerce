@@ -42,7 +42,7 @@
     "src/**/*.tsx",
     ".next/types/**/*.ts",
     "../../packages/**/*.tsx"
-  ],
+, "../user-ui/src/configs/categories.ts"  ],
   "exclude": [
     "out-tsc",
     "dist",

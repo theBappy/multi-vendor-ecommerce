@@ -453,6 +453,73 @@ export const getAllProducts = async (
     next(error);
   }
 };
+// get all events
+export const getAllEvents= async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 20;
+    const skip = (page - 1) * limit;
+    const type = req.query.type;
+
+    // const now = new Date();
+
+    const baseFilter = {
+      AND: [{starting_date: {not: null}}, {ending_date: {not: null}}]
+      // isDeleted: false,
+      // AND: [
+      //   {
+      //     OR: [
+      //       { starting_date: null },
+      //       { starting_date: { lte: now } }, // started on or before now
+      //     ],
+      //   },
+      //   {
+      //     OR: [
+      //       { ending_date: null },
+      //       { ending_date: { gte: now } }, // ends on or after now
+      //     ],
+      //   },
+      // ],
+    };
+
+    const orderBy: Prisma.productsOrderByWithRelationInput =
+      type === "latest" ? { createdAt: "desc" } : { totalSales: "desc" };
+
+    const [events, total, top10BySales] = await Promise.all([
+      prisma.products.findMany({
+        skip,
+        take: limit,
+        include: {
+          images: true,
+          shop: true,
+        },
+        where: baseFilter,
+        orderBy,
+      }),
+      prisma.products.count({ where: baseFilter }),
+      prisma.products.findMany({
+        take: 10,
+        where: baseFilter,
+        orderBy,
+      }),
+    ]);
+
+    res.status(200).json({
+      events,
+      top10By: type === "latest" ? "latest" : "topSales",
+      top10BySales,
+      total,
+      currentPage: page,
+      totalPages: Math.ceil(total / limit),
+    });
+  } catch (error) {
+    res.status(500).json({message: "Failed to fetch events"});
+  }
+};
 
 
 // get product details 
@@ -884,5 +951,7 @@ export const topShops = async (
     return next(error);
   }
 };
+
+
 
 
