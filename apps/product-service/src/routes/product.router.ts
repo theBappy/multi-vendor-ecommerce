@@ -18,6 +18,7 @@ import {
   searchProducts,
   topShops,
   getFilteredOffers,
+  getAllEvents,
 } from "../controllers/product.controller";
 import isAuthenticated from "@packages/middleware/isAuthenticated";
 
@@ -38,6 +39,7 @@ router.delete("/delete-product/:productId", isAuthenticated, deleteProduct);
 router.put("/restore-product/:productId", isAuthenticated, restoreProduct);
 router.get("/get-shop-products", isAuthenticated, getShopProducts);
 router.get("/get-all-products", getAllProducts);
+router.get("/get-all-events", getAllEvents);
 router.get("/get-product-details/:slug", getProductDetails);
 router.get("/get-filtered-products", getFilteredProducts);
 router.get("/get-filtered-offers", getFilteredOffers);

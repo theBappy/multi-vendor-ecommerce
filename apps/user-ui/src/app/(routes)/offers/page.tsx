@@ -39,7 +39,7 @@ const Page = () => {
 
   // State for categories and subcategories fetched from API
   const [categories, setCategories] = useState<string[]>([]);
-  const [subCategories, setSubCategories] = useState<Record<string, string[]>>({});
+  const [subCategories, setSubCategories] = useState<Record<string, string[]>>([]);
 
   // Fetch categories & subCategories once on mount
   useEffect(() => {
@@ -121,7 +121,7 @@ const Page = () => {
       <div className="w-[90%] lg:w-[80%] m-auto">
         <div className="pb-[50px]">
           <h1 className="md:pt-[40px] font-medium text-[44px] leading-1 mb-[14px] font-Poppins">
-            All Products
+            All Offers
           </h1>
           <Link href="/" className="text-[#55585b]">
             Home
@@ -279,7 +279,7 @@ const Page = () => {
             ): products.length > 0 ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-5">
                     {products.map((product) => (
-                        <ProductCard key={product.id} product={product} />
+                        <ProductCard key={product.id} product={product} isEvent={true} />
                     ))}
                 </div>
             ) : (
