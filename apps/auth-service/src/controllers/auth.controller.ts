@@ -17,6 +17,8 @@ import Stripe from "stripe";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
+
+
 // register a new user
 export const userRegistration = async (
   req: Request,
