@@ -12,6 +12,7 @@ import { useState } from "react";
 import { Loader2 } from "lucide-react";
 import axiosInstance from "apps/user-ui/src/utils/axiosInstance";
 import { useQuery } from "@tanstack/react-query";
+import toast from 'react-hot-toast'
 
 const CartPage = () => {
   const router = useRouter();
@@ -71,6 +72,24 @@ const CartPage = () => {
       }
     }
   }, [addresses, selectedAddressId])
+
+  const createPaymentSession = async() => {
+    setLoading(true)
+    try{
+      const res = await axiosInstance.post("/order/api/create-payment-session", {
+        cart,
+        selectedAddressId,
+        coupon: {},
+      })
+      const sessionId = res.data.sessionId;
+      router.push(`/checkout?sessionId=${sessionId}`)
+
+    }catch(error){
+      toast.error('Something went wrong. Please try again later!')
+    }finally{
+      setLoading(false)
+    }
+  }
 
   return (
     <div className="w-full bg-white">
@@ -267,6 +286,7 @@ const CartPage = () => {
                        <span>${(subtotal - discountAmount).toFixed(2)}</span>
                     </div>
                     <button
+                    onClick={createPaymentSession}
                     disabled={loading}
                     className="w-full flex items-center justify-center gap-2 cursor-pointer mt-4 py-3 bg-[#010f1c] text-white hover:bg-[#0989ff] transition-all rounded-lg"
                     >

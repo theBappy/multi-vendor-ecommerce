@@ -15,18 +15,18 @@ export const createPaymentIntent = async (
   res: Response,
   next: NextFunction
 ) => {
-  const { amount, sellerStripeAccountId, sessionId } = req.body;
+  const { amount, stripeId, sessionId } = req.body;
   const customerAmount = Math.round(amount * 100);
-  const platformFee = Math.floor(customerAmount * 0.1);
+  // const platformFee = Math.floor(customerAmount * 0.1);
 
   try {
     const paymentIntent = await stripe.paymentIntents.create({
       amount: customerAmount,
       currency: "usd",
       payment_method_types: ["card"],
-      application_fee_amount: platformFee,
+      // application_fee_amount: platformFee,
       transfer_data: {
-        destination: sellerStripeAccountId,
+        destination: stripeId,
       },
       metadata: {
         sessionId,
@@ -132,7 +132,7 @@ export const createPaymentSession = async (
         sellers: sellerData,
         totalAmount,
         shippingAddressId: selectedAddressId || null,
-        coupon: coupon || null;
+        coupon: coupon || null,
     }
     await redis.setex(
         `payment-session:${sessionId}`,
@@ -156,7 +156,7 @@ export const verifyPaymentSession = async (
     try{
         const sessionId = req.query.sessionId as string;
 
-        if(!sessionId) return res.status(400).json({errorr: 'Session ID is required!'})
+        if(!sessionId) return res.status(400).json({error: 'Session ID is required!'})
 
         // fetch session from redis
         const sessionKey = `payment-session:${sessionId}`
