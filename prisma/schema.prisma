@@ -32,7 +32,8 @@ model users {
   reviews        shopReviews[]
   userAnalytics  userAnalytics[]
   orders         orders[]
-  userAddress userAddress[]
+  userAddress    userAddress[]
+  notifications  notifications[]
 }
 
 model shopReviews {
@@ -67,7 +68,7 @@ model shops {
   updatedAt     DateTime      @updatedAt
   products      products[]
   orders        orders[]
-  userAddress userAddress[]
+  userAddress   userAddress[]
 }
 
 model sellers {
@@ -182,32 +183,63 @@ model productAnalytics {
 }
 
 model orders {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  userId    String   @db.ObjectId
-  user      users    @relation(fields: [userId], references: [id])
-  shopId    String   @db.ObjectId
-  shop      shops    @relation(fields: [shopId], references: [id])
-  total     Float
-  status    String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id                String       @id @default(auto()) @map("_id") @db.ObjectId
+  userId            String       @db.ObjectId
+  user              users        @relation(fields: [userId], references: [id])
+  shopId            String       @db.ObjectId
+  shop              shops        @relation(fields: [shopId], references: [id])
+  total             Float
+  status            String
+  shippingAddressId String?      @db.ObjectId
+  shippingAddress   userAddress? @relation(fields: [shippingAddressId], references: [id])
+  couponCode        String?
+  discountAmount    Float?       @default(0)
+  items             orderItem[]
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
 }
+
+model orderItem {
+  id              String @id @default(auto()) @map("_id") @db.ObjectId
+  orderId         String @db.ObjectId
+  order           orders @relation(fields: [orderId], references: [id])
+  productId       String @db.ObjectId
+  quantity        Int
+  price           Float
+  selectedOptions Json?
+
+  @@index([productId])
+}
+
 model userAddress {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  id        String  @id @default(auto()) @map("_id") @db.ObjectId
   label     String
   name      String
   street    String
   city      String
   zip       String
   country   String
-  isDefault Boolean  @default(false)
+  isDefault Boolean @default(false)
 
-  userId    String?  @db.ObjectId
-  user      users?   @relation(fields: [userId], references: [id])
+  userId String? @db.ObjectId
+  user   users?  @relation(fields: [userId], references: [id])
 
-  shopId    String?  @db.ObjectId
-  shop      shops?   @relation(fields: [shopId], references: [id])
+  shopId String? @db.ObjectId
+  shop   shops?  @relation(fields: [shopId], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  orders    orders[]
+}
+
+model notifications {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  title         String
+  message       String
+  creatorId     String   @db.ObjectId
+  creator       users    @relation(fields: [creatorId], references: [id])
+  receiverId    String
+  redirect_link String?
+  isRead        Boolean  @default(false)
+  createdAt     DateTime @default(now())
 }

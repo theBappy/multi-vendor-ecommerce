@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Order Confirmation</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f9f9f9;
+        margin: 0;
+        padding: 20px;
+        color: #333;
+      }
+
+      .container {
+        background-color: #ffffff;
+        border-radius: 8px;
+        padding: 30px;
+        max-width: 600px;
+        margin: auto;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      }
+
+      .header {
+        text-align: center;
+        margin-bottom: 20px;
+      }
+
+      .header h1 {
+        color: #4caf50;
+      }
+
+      .items {
+        margin-top: 20px;
+      }
+
+      .item {
+        border-bottom: 1px solid #ddd;
+        padding: 10px 0;
+        display: flex;
+        justify-content: space-between;
+      }
+
+      .item:last-child {
+        border-bottom: none;
+      }
+
+      .total {
+        font-weight: bold;
+        font-size: 18px;
+        margin-top: 20px;
+        text-align: right;
+      }
+
+      .footer {
+        margin-top: 30px;
+        text-align: center;
+        font-size: 14px;
+        color: #777;
+      }
+
+      a.button {
+        display: inline-block;
+        padding: 10px 20px;
+        background-color: #4caf50;
+        color: white;
+        text-decoration: none;
+        border-radius: 5px;
+        margin-top: 15px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>Thank you for your order, <%= name %>!</h1>
+        <p>Here’s a summary of your purchase.</p>
+      </div>
+
+      <div class="items">
+        <% cart.forEach(item => { %>
+          <div class="item">
+            <div>
+              <strong><%= item.name %></strong>
+              <div>Qty: <%= item.quantity %></div>
+            </div>
+            <div>$<%= item.sale_price.toFixed(2) %></div>
+          </div>
+        <% }); %>
+      </div>
+
+      <div class="total">
+        Total Paid: $<%= totalAmount.toFixed(2) %>
+      </div>
+
+      <div class="footer">
+        <p>You can track your order here:</p>
+        <a class="button" href="<%= trackingUrl %>">Track Order</a>
+
+        <p style="margin-top: 30px;">
+          If you have any questions, feel free to <a href="mailto:support@eshop.com">contact us</a>.
+        </p>
+
+        <p style="margin-top: 10px;">&copy; <%= new Date().getFullYear() %> E-Shop. All rights reserved.</p>
+      </div>
+    </div>
+  </body>
+</html>
