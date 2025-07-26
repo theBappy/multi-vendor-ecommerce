@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Plus, X } from "lucide-react";
+import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
+import { Plus, X, MapPin, Trash2 } from "lucide-react";
 
 import { countries } from "apps/user-ui/src/configs/countries";
 import axiosInstance from "apps/user-ui/src/utils/axiosInstance";
@@ -40,7 +40,9 @@ export const ShippingAddressSection = () => {
   });
 
   const { mutate: addAddress } = useMutation({
-    mutationFn: async (payload: Omit<AddressFormData, "isDefault"> & { isDefault: boolean }) => {
+    mutationFn: async (
+      payload: Omit<AddressFormData, "isDefault"> & { isDefault: boolean }
+    ) => {
       const res = await axiosInstance.post("/api/add-address", payload);
       return res.data.address;
     },
@@ -51,12 +53,29 @@ export const ShippingAddressSection = () => {
     },
   });
 
+  const { data: addresses, isLoading } = useQuery({
+    queryKey: ["shipping-addresses"],
+    queryFn: async () => {
+      const res = await axiosInstance.get("/api/shipping-address");
+      return res.data.addresses;
+    },
+  });
+
   const onSubmit = (data: AddressFormData) => {
     addAddress({
       ...data,
       isDefault: data.isDefault === "true",
     });
   };
+
+  const { mutate: deleteAddress } = useMutation({
+    mutationFn: async (id: string) => {
+      await axiosInstance.delete(`/api/delete-address/${id}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["shipping-addresses"] });
+    },
+  });
 
   return (
     <div className="space-y-4">
@@ -72,8 +91,49 @@ export const ShippingAddressSection = () => {
         </button>
       </div>
 
-      {/* Address list (to be implemented later) */}
-      <div>{/* Map addresses here */}</div>
+      {/* Address list */}
+      <div>
+        {isLoading ? (
+          <p className="text-sm text-gray-500">Loading Addresses...</p>
+        ) : !addresses || addresses.length === 0 ? (
+          <p className="text-sm text-gray-600">No address found</p>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {addresses.map((address: any) => (
+              <div
+                key={address.id}
+                className="border border-gray-200 rounded-md p-4 relative"
+              >
+                {address.isDefault && (
+                  <span className="absolute top-2 right-2 bg-blue-100 text-blue-600 text-xs px-2 py-0.5 rounded-full">
+                    Default
+                  </span>
+                )}
+                <div className="flex items-start gap-2 text-sm text-gray-700">
+                  <MapPin className="w-5 h-5 mt-0.5 text-gray-500" />
+                  <div>
+                    <p className="font-medium">
+                      {address.label} - {address.name}
+                    </p>
+                    <p className="font-medium">
+                      {address.street}, {address.city}, {address.zip},{" "}
+                      {address.country}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex gap-3 mt-4">
+                  <button
+                    className="flex items-center gap-1 !cursor-pointer text-xs"
+                    onClick={() => deleteAddress(address.id)}
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
 
       {/* Modal */}
       {showModal && (
@@ -85,7 +145,9 @@ export const ShippingAddressSection = () => {
             >
               <X className="w-5 h-5" />
             </button>
-            <h3 className="text-lg font-semibold mb-4 text-gray-800">Add New Address</h3>
+            <h3 className="text-lg font-semibold mb-4 text-gray-800">
+              Add New Address
+            </h3>
 
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
               {/* Label */}
@@ -101,7 +163,9 @@ export const ShippingAddressSection = () => {
                 {...register("name", { required: "Name is required" })}
                 className="form-input w-full"
               />
-              {errors.name && <p className="text-red-500 text-xs">{errors.name.message}</p>}
+              {errors.name && (
+                <p className="text-red-500 text-xs">{errors.name.message}</p>
+              )}
 
               {/* Street */}
               <input
@@ -109,7 +173,9 @@ export const ShippingAddressSection = () => {
                 {...register("street", { required: "Street is required" })}
                 className="form-input w-full"
               />
-              {errors.street && <p className="text-red-500 text-xs">{errors.street.message}</p>}
+              {errors.street && (
+                <p className="text-red-500 text-xs">{errors.street.message}</p>
+              )}
 
               {/* City */}
               <input
@@ -117,7 +183,9 @@ export const ShippingAddressSection = () => {
                 {...register("city", { required: "City is required" })}
                 className="form-input w-full"
               />
-              {errors.city && <p className="text-red-500 text-xs">{errors.city.message}</p>}
+              {errors.city && (
+                <p className="text-red-500 text-xs">{errors.city.message}</p>
+              )}
 
               {/* Zip */}
               <input
@@ -125,7 +193,9 @@ export const ShippingAddressSection = () => {
                 {...register("zip", { required: "Zip Code is required" })}
                 className="form-input w-full"
               />
-              {errors.zip && <p className="text-red-500 text-xs">{errors.zip.message}</p>}
+              {errors.zip && (
+                <p className="text-red-500 text-xs">{errors.zip.message}</p>
+              )}
 
               {/* Country */}
               <select {...register("country")} className="form-input w-full">
